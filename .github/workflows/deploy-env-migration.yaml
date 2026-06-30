@@ -1,0 +1,149 @@
+name: Deploy Environment & Migrate Data (Data Sync)
+
+# =============================================================================
+# IaC ↔ 数据流单向迁移流水线
+# 1. 动态 Provision (基于 Terraform 创建新环境)
+# 2. 部署基础服务 (Bootstrap 部署，跑空环境)
+# 3. 生产环境克隆与单向同步 (通过 site_migration Ansible 角色)
+# =============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      infra_ref:
+        description: "ai-workspace-infra git ref"
+        required: false
+        default: "main"
+        type: string
+      source_host:
+        description: "源环境 IP 或域名 (用于导出数据)"
+        required: true
+        default: "install.svc.plus"
+        type: string
+      source_domain_base:
+        description: "源环境域名后缀 (例如 svc.plus)"
+        required: true
+        default: "svc.plus"
+        type: string
+      target_domain_base:
+        description: "新环境域名后缀 (用于参数化替换，如 onwalk.net)"
+        required: true
+        default: "onwalk.net"
+        type: string
+      run_provision_and_deploy:
+        description: "是否执行 Provision 和基础环境 Deploy? (如果只迁移数据则取消勾选)"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-env-migration
+  cancel-in-progress: false
+
+env:
+  VAULT_ADDR: https://vault.svc.plus
+  VAULT_ROLE: github-actions-xworkspace-console
+  VAULT_KV: kv/data/CICD
+  PLAYBOOKS_DIR: infra/playbooks
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 步骤 1: 基础设施配置与启动 (Provision)
+  # [可直接参考 deploy-ai-workspace-iac.yaml 中的 provision]
+  # ---------------------------------------------------------------------------
+  provision:
+    name: Provision New Environment (Terraform)
+    if: ${{ github.event.inputs.run_provision_and_deploy == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infra
+        uses: actions/checkout@v7
+        with:
+          repository: ai-workspace-infra/iac_modules
+          ref: ${{ github.event.inputs.infra_ref }}
+          path: infra/iac_modules
+          
+      - name: Load Vault secrets
+        id: vault
+        uses: hashicorp/vault-action@v4
+        with:
+          url: ${{ env.VAULT_ADDR }}
+          method: jwt
+          role: ${{ env.VAULT_ROLE }}
+          secrets: |
+            ${{ env.VAULT_KV }} VULTR_API_KEY | VULTR_API_KEY ;
+      
+      # 省略实际 Terraform Apply 步骤 (参考原有 IAC 流水线)...
+      - name: Placeholder for Terraform Apply
+        run: echo "Terraform applies new infrastructure and outputs target IPs..."
+
+  # ---------------------------------------------------------------------------
+  # 步骤 2: 基础环境安装 (Bootstrap Deploy)
+  # ---------------------------------------------------------------------------
+  deploy_base:
+    name: Deploy Base Services
+    needs: provision
+    if: ${{ github.event.inputs.run_provision_and_deploy == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for Ansible Base Deploy
+        run: echo "Run on-host-bootstrap.sh on new nodes..."
+
+  # ---------------------------------------------------------------------------
+  # 步骤 3: 全站单向数据流迁移与环境恢复 (Data Migration)
+  # ---------------------------------------------------------------------------
+  data_migration:
+    name: Migrate Site Data (Source -> Target)
+    needs: deploy_base
+    # 即使不执行 Provision，也可以单独触发纯数据同步
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout playbooks
+        uses: actions/checkout@v7
+        with:
+          repository: ai-workspace-infra/playbooks
+          ref: ${{ github.event.inputs.infra_ref }}
+          path: infra/playbooks
+
+      - name: Install Ansible
+        run: pip install --quiet ansible
+
+      - name: Load Vault secrets for SSH
+        id: vault
+        uses: hashicorp/vault-action@v4
+        with:
+          url: ${{ env.VAULT_ADDR }}
+          method: jwt
+          role: ${{ env.VAULT_ROLE }}
+          secrets: |
+            ${{ env.VAULT_KV }} SSH_PRIVATE_DEPLOY_KEY_B64 | ANSIBLE_SSH_KEY_B64
+
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "${{ steps.vault.outputs.ANSIBLE_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+
+      - name: Generate Migration Inventory
+        run: |
+          # 模拟从 IAC 或人工输入中获取 target_ip (这里假定 target_ip 是通过环境变量或输入传入)
+          TARGET_IP="new_env_ip_placeholder" 
+          echo "[migration_source]" > inventory_migration.ini
+          echo "${{ github.event.inputs.source_host }} ansible_user=root ansible_ssh_private_key_file=~/.ssh/id_deploy" >> inventory_migration.ini
+          echo "" >> inventory_migration.ini
+          echo "[migration_target]" >> inventory_migration.ini
+          echo "${TARGET_IP} ansible_user=root ansible_ssh_private_key_file=~/.ssh/id_deploy" >> inventory_migration.ini
+
+      - name: Run Ansible Site Migration Playbook
+        working-directory: ${{ env.PLAYBOOKS_DIR }}
+        run: |
+          ansible-playbook \
+            -i ../inventory_migration.ini \
+            migrate_site.yml \
+            -e "target_domain=${{ github.event.inputs.target_domain_base }}" \
+            -e "migration_flow.source.domain_base=${{ github.event.inputs.source_domain_base }}"
