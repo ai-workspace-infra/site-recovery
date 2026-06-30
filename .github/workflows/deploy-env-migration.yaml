@@ -338,11 +338,11 @@ jobs:
           jwtGithubAudience: vault
           ignoreNotFound: true
           secrets: |
-            ${{ env.VAULT_KV }} CLOUDFLARE_API_TOKEN | CLOUDFLARE_API_TOKEN
+            ${{ env.VAULT_KV }} CLOUDFLARE_DNS_API_TOKEN | CLOUDFLARE_DNS_API_TOKEN
 
       - name: Switch Cloudflare DNS Records
         env:
-          CLOUDFLARE_API_TOKEN: ${{ steps.vault.outputs.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_DNS_API_TOKEN: ${{ steps.vault.outputs.CLOUDFLARE_DNS_API_TOKEN }}
         run: |
           cd infra/playbooks
           ansible-playbook -i ../../cmdb/inventory update_cloudflare_svc_plus_dns.yml
