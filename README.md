@@ -4,6 +4,13 @@
 
 Welcome to the **Site Migration & Backup Toolkit**. This repository provides the orchestrations, runbooks, and automated playbooks for managing the disaster recovery lifecycle of the AI Workspace infrastructure.
 
+## Documentation Index
+
+- [Live Systems Overview](docs/EN/Systems-Overview/PROD/live_systems_overview.md)
+- [Full-Site Unified Backup & DR Plan](docs/EN/BackUP/backup_dr_plan.md)
+- [Unified DB Backup & DR Plan (PostgreSQL)](docs/EN/BackUP/postgresql_disaster_recovery.md)
+
+
 ## Phase Roadmap
 
 This project is iteratively rolling out disaster recovery capabilities. Currently, we are heavily focused on **Phase 1**.
@@ -115,6 +122,15 @@ EOF
 # 站点迁移与备份工具集 (Site Migration & Backup Toolkit)
 
 欢迎使用 **Site Migration & Backup Toolkit**。本代码库提供了管理 AI Workspace 基础架构灾难恢复生命周期的编排、运维手册和自动化 Playbooks。
+
+## 文档索引 (Documentation Index)
+
+- [线上系统概览 (Live Systems Overview)](docs/ZH/Systems-Overview/PROD/live_systems_overview.md)
+- [全站统一备份与灾备方案 (Full-Site Unified Backup & DR Plan)](docs/ZH/BackUP/backup_dr_plan.md)
+- [统一数据库备份与灾备方案 (PostgreSQL)](docs/ZH/BackUP/postgresql_disaster_recovery.md)
+- [站点迁移与数据同步实施总结 (Walkthrough)](docs/ZH/BackUP/Site-Migration/walkthrough.md)
+- [全站单向数据流迁移与环境复制方案 (Implementation Plan)](docs/ZH/BackUP/Site-Migration/implementation_plan.md)
+
 
 ## 阶段演进路线图 (Phase Roadmap)
 
