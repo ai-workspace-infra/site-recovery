@@ -18,7 +18,7 @@ on:
       source_host:
         description: "源环境 IP 或域名 (用于导出数据)"
         required: true
-        default: "console.svc.plus"
+        default: "install.svc.plus"
         type: string
       source_domain_base:
         description: "源环境域名后缀 (例如 svc.plus)"
