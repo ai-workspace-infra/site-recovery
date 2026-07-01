@@ -27,7 +27,7 @@ By reverse-engineering the configurations under `/etc/caddy/conf.d/` on the `ins
 | Business System | Exposed Domain | Internal Proxy Target (Upstream) | Description |
 | :--- | :--- | :--- | :--- |
 | Zitadel | `zitadel.svc.plus` | `127.0.0.1:19080/19081` | IAM Global SSO (API & UI) |
-| Accounts | `accounts.svc.plus`<br>`accounts-contabo-*.svc.plus` | `127.0.0.1:18081` | Production Account Management Service |
+| Accounts | `accounts.svc.plus` | `127.0.0.1:18081` | Production Account Management Service |
 | ~~Accounts (Preview)~~ | ~~`accounts-preview.svc.plus`~~ | ~~`127.0.0.1:28081`~~ | ⚠️ **[Planned for Deprecation]** Preview / Testing Environment Account Service (Will not be pulled up on DR node) |
 
 ## 4. Frontends & Consoles

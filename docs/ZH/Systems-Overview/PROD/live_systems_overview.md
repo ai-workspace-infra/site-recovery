@@ -27,7 +27,7 @@
 | 业务系统 | 对外暴露域名 (Domain) | 内网代理目标 (Upstream) | 备注描述 |
 | :--- | :--- | :--- | :--- |
 | Zitadel | `zitadel.svc.plus` | `127.0.0.1:19080/19081` | IAM 全局单点登录 (API 与 UI) |
-| Accounts | `accounts.svc.plus`<br>`accounts-contabo-*.svc.plus` | `127.0.0.1:18081` | 生产环境账户管理服务 |
+| Accounts | `accounts.svc.plus` | `127.0.0.1:18081` | 生产环境账户管理服务 |
 | ~~Accounts (Preview)~~ | ~~`accounts-preview.svc.plus`~~ | ~~`127.0.0.1:28081`~~ | ⚠️ **[计划下线]** 预览 / 测试环境账户服务 (灾备节点不再拉起) |
 
 ## 4. 控制台与前端应用 (Frontends)
