@@ -294,6 +294,9 @@ jobs:
 
       - name: Run Toolkit Action (${{ github.event.inputs.toolkit_action }})
         working-directory: site-migration-toolkit
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_ARGS: "-o IdentityFile=~/.ssh/id_deploy -o StrictHostKeyChecking=no"
         run: |
           make ${{ github.event.inputs.toolkit_action }} RUN_ARGS="-e source_host=${{ github.event.inputs.source_host }} -e target_domain=${{ github.event.inputs.target_domain_base }} -e migration_flow.source.domain_base=${{ github.event.inputs.source_domain_base }}"
 
