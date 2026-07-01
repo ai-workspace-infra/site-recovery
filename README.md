@@ -53,8 +53,8 @@ Only reserve roadmap placeholders for:
 ### ⚠️ CI/CD Prerequisites (Important Notice)
 
 If you are running the GitHub Actions workflow (`deploy-env-migration.yaml`), please ensure that your Vault environment is correctly configured:
-- **Vault Role**: The current configured role is `github-actions-site-recovery` (kept for backward compatibility with the old repository name). Ensure this role exists in your Vault instance.
-- **Role Binding**: If the role is bound to the repository name, make sure the `bound_claims` match or are updated to reflect the new repository name if you ever recreate the role.
+- **Vault Role**: The required role name is `github-actions-site-migration-toolkit`.
+- **Role Binding**: Ensure the JWT `bound_claims` match the new repository name (`repo:ai-workspace-infra/site-migration-toolkit:ref:refs/heads/main` or similar).
 
 ---
 
@@ -111,5 +111,5 @@ If you are running the GitHub Actions workflow (`deploy-env-migration.yaml`), pl
 ### ⚠️ CI/CD 前置条件 (重要提示)
 
 如果您正在运行 GitHub Actions 流水线 (`deploy-env-migration.yaml`)，请确保您的 Vault 环境已正确配置：
-- **Vault 角色 (Role)**: 当前配置的角色名为 `github-actions-site-recovery`（为兼容旧代码库名而保留）。请确保您的 Vault 实例中存在该角色。
-- **角色绑定 (Role Binding)**: 如果该角色是基于代码库名称绑定的，请确保其 `bound_claims` 匹配，或者在重建角色时更新为新的代码库名称。
+- **Vault 角色 (Role)**: 所需的角色名为 `github-actions-site-migration-toolkit`。
+- **角色绑定 (Role Binding)**: 请确保 JWT 的 `bound_claims` 匹配新的代码库名称（例如 `repo:ai-workspace-infra/site-migration-toolkit:ref:refs/heads/main`）。
