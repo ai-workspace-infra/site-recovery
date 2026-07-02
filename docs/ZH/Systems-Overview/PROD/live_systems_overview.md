@@ -1,6 +1,6 @@
 # 线上环境全业务系统拓扑梳理 (Caddy)
 
-通过对 `install.svc.plus` 节点 `/etc/caddy/conf.d/` 下的配置及最新安全架构矩阵进行梳理，当前线上环境的业务系统已整合并拆分为三大核心域（Domain）。所有服务均已严格落实 Localhost (127.0.0.1) 端口绑定策略，且强状态服务均接入具备独立账户隔离的专用 PostgreSQL 存储库。
+通过直连 `root@install.svc.plus` 并对其 `/etc/caddy/conf.d/*.caddy` 实际线上配置进行逆向解析，结合我们最新的架构规划，当前线上环境的业务系统划分为以下三大核心业务域（Domain）。所有强状态服务均已严格落实 Localhost (127.0.0.1) 端口绑定策略以及独立账户隔离的专用 PostgreSQL 存储库。
 
 ## 1. AI Workspace 域 (AI-Workspace)
 专注于核心人工智能与工作流代理服务。
@@ -10,7 +10,7 @@
 | API Gateway | `apigateway.svc.plus` | `127.0.0.1:9080` | 通用 API 网关 |
 | LiteLLM (API) | `api.svc.plus` | `127.0.0.1:4000` | 模型统一路由与 OpenAI/Anthropic 路径兼容转换层 |
 | LiteLLM (UI) | `litellm.svc.plus` | `127.0.0.1:4000` | LiteLLM Admin UI / Dashboard |
-| OpenClaw (Bot) | `openclaw.svc.plus` | `127.0.0.1:18789` | OpenClaw 聊天机器人后台服务 (API 对接 QMD) |
+| OpenClaw (Bot) | `openclaw.svc.plus` | `127.0.0.1:18789` | OpenClaw 聊天机器人后台服务 (无状态，API 对接 QMD) |
 | RAG / QMD | `rag-server.svc.plus`<br>`rag-server-contabo-*.svc.plus` | `127.0.0.1:18084` | 检索增强引擎后端 (支持 pgvector) |
 | XWorkmate Bridge | `xworkmate-bridge.svc.plus` | `127.0.0.1:8787` | 带有 Bearer Token 强鉴权的工作流桥接器 |
 | Hermes | `hermes.svc.plus` | `127.0.0.1:18180` | 消息通知网关 (Notification) |
@@ -20,12 +20,12 @@
 
 | 业务系统 | 对外暴露域名 (Domain) | 内网代理目标 (Upstream) | 备注描述 |
 | :--- | :--- | :--- | :--- |
-| Console | `console.svc.plus` | `127.0.0.1:3000` | AI Workspace 主控台面板 (对接 Accounts/Billing 后端) |
+| Console | `console.svc.plus` | `127.0.0.1:3000` | AI Workspace 主控台面板 (对接 Accounts, billing, xworkmate-bridge 后端) |
 | Accounts | `accounts.svc.plus` | `127.0.0.1:18081` | 统一账户服务 |
-| Billing | `billing.svc.plus` | 动态内部端口 | 计费流水与支付网关 (Stripe-pay 集成) |
+| Billing | `billing.svc.plus` | *(内网集群路由)* | 计费流水服务 (与前端串联) |
 | Install Scripts | `install.svc.plus` | `302 Redir -> Github` | 供 curl 拉取执行的一键安装脚本短链接分发 |
 | Ebook | `ebook.svc.plus` | 静态文件 | Modern IT History 电子书 (`/opt/modern-it-history/current`) |
-| Docs | `docs.svc.plus` | `127.0.0.1:18083` | 系统帮助文档 |
+| Docs | `docs.svc.plus`<br>`docs-contabo-*.svc.plus` | `127.0.0.1:18083` | 系统帮助文档 |
 | JP XHTTP / Xray | `jp-xhttp.svc.plus` | `/dev/shm/xray.sock` | 跨境网络代理隧道与加速资源池 |
 | ~~Accounts (Preview)~~| ~~`accounts-preview...`~~ | ~~`127.0.0.1:28081`~~ | ⚠️ **[计划下线]** 测试环境服务不再拉起 |
 
@@ -35,8 +35,8 @@
 | 业务系统 | 对外暴露域名 (Domain) | 内网代理目标 (Upstream) | 备注描述 |
 | :--- | :--- | :--- | :--- |
 | Vault | `vault.svc.plus` | `127.0.0.1:8200` | 统一凭证与密钥持久化服务 (无 dev 模式，严控 Root) |
-| Zitadel | `zitadel.svc.plus` | 容器内网映射 | IAM 全局单点登录 SSO (API 与 UI) |
-| Gitea | `gitea.svc.plus` | `127.0.0.1:3001` | 私有 Git 代码托管平台 |
+| Zitadel (IAM) | `iam.svc.plus` | `127.0.0.1:19080/19081` | IAM 全局单点登录 SSO (API 与 UI) |
+| Gitea | `gitea.svc.plus` | `localhost:3001` | 私有 Git 代码托管平台 |
 | PostgreSQL Tunnel | `postgresql-contabo...` | 静态 200 响应 | 特定代理入口与 TLS 网络探针 (数据库本身禁止公网直连) |
 | ~~Code Server~~ | ~~`observability.../code/`~~ | ~~`127.0.0.1:8443`~~ | ⚠️ **[计划下线]** 网页版 VSCode 开发环境 |
 | ~~Jupyter Lab~~ | ~~`observability.../jupyter/`~~| ~~`127.0.0.1:8888`~~ | ⚠️ **[计划下线]** 数据科学 Jupyter 环境 |
@@ -53,11 +53,11 @@
 | `/vmalert/*` | `127.0.0.1:8880` | VictoriaMetrics Alert 告警引擎 |
 | `/alertmgr/*` | `127.0.0.1:9059` | Alertmanager 告警路由与发送 |
 | `/blackbox/*` | `127.0.0.1:9115` | Blackbox Exporter 网络拨测 |
+| `/haproxy/pg-meta-1/*` | `10.146.0.6:9101` | HAProxy 管理控制台转发 |
 | ~~`/insight/*`~~ | ~~`127.0.0.1:8082`~~ | ⚠️ **[计划下线]** Insight Workbench 数据分析台 |
 
-## 4. 废弃的基础设施
-| 业务系统 | 对外暴露域名 (Domain) | 内网代理目标 (Upstream) | 备注描述 |
-| :--- | :--- | :--- | :--- |
-| ~~X-Cloud-Flow~~ | ~~`x-cloud-flow.svc.plus`~~ | ~~`127.0.0.1:18083/18087`~~ | ⚠️ **[计划下线]** 云上流控或编排引擎 |
-| ~~X-Ops-Agent~~ | ~~`x-ops-agent.svc.plus`~~ | ~~`127.0.0.1:18084/18086`~~ | ⚠️ **[计划下线]** 自动化运维 Agent |
-| ~~X-Scope-Hub~~ | ~~`x-scope-hub.svc.plus`~~ | ~~`127.0.0.1:18085`~~ | ⚠️ **[计划下线]** 资源范围枢纽 |
+## 4. 已清理下线的基础设施
+以下系统配置已从线上节点 `/etc/caddy/conf.d/` 彻底移除：
+* `x-cloud-flow.svc.plus` (云上流控或编排引擎)
+* `x-ops-agent.svc.plus` (自动化运维 Agent)
+* `x-scope-hub.svc.plus` (资源范围枢纽)
