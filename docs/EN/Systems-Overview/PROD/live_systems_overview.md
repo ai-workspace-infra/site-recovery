@@ -15,6 +15,16 @@ Focuses on core AI and workflow agent services.
 | XWorkmate Bridge | `xworkmate-bridge.svc.plus` | `127.0.0.1:8787` | Workflow Bridge with Bearer Token strict authentication |
 | Hermes | `hermes.svc.plus` | `127.0.0.1:18180` | Message Notification Gateway |
 
+### 1.1 Internal Agent Skills & Plugins
+Maintained under the live node directory `/opt/agent.svc.plus/skills`, this is a centralized repository of built-in capabilities designed to be mounted and executed by Agent Workflows in the AI Workspace:
+
+| Skill / Plugin Name | Physical Path | Description & Core Purpose |
+| :--- | :--- | :--- |
+| **Git Conventional Commits** | `git.conventional-commits.v1.md` | Skill for enforcing and generating standard Git conventional commits |
+| **Git Commit Check** | `git.commit-check.v1.md` | Pre-commit code quality and compliance validation checks |
+| **Secret Incident Response** | `git.secret-incident-response.v1.md` | Automated incident response and mitigation workflows for leaked credentials |
+| **Release Branch Policy** | `release-branch-policy/` | A composite release pipeline skill including branch ruleset enforcement (`apply_ruleset.sh`), release manifest generation, and multi-repo sync scripts |
+
 ## 2. Web SaaS Domain
 Includes user-facing frontends, account billing flows, and network acceleration pools.
 

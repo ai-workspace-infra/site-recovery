@@ -15,6 +15,16 @@
 | XWorkmate Bridge | `xworkmate-bridge.svc.plus` | `127.0.0.1:8787` | 带有 Bearer Token 强鉴权的工作流桥接器 |
 | Hermes | `hermes.svc.plus` | `127.0.0.1:18180` | 消息通知网关 (Notification) |
 
+### 1.1 内部 Agent 技能与插件 (Internal Agent Skills)
+位于线上节点 `/opt/agent.svc.plus/skills` 目录下，由 AI Workspace 统一管理并提供给智能体工作流 (Agent Workflows) 调用的内置技能库：
+
+| 技能/插件名称 | 物理路径 | 核心功能与用途描述 |
+| :--- | :--- | :--- |
+| **Git Conventional Commits** | `git.conventional-commits.v1.md` | 规范化 Git 提交信息的审查与自动化生成技能 |
+| **Git Commit Check** | `git.commit-check.v1.md` | 提交前置代码质量检查与合规性扫描技能 |
+| **Secret Incident Response** | `git.secret-incident-response.v1.md` | 针对代码库凭证泄露等高危安全事件的自动化应急响应与封堵策略 |
+| **Release Branch Policy** | `release-branch-policy/` | 复合型应用发布管线技能，包含分支保护规则应用 (`apply_ruleset.sh`)、发布清单自动生成及多仓库同步脚本 |
+
 ## 2. Web SaaS 域 (Web SaaS)
 包含对外提供服务的用户前端、账户流水以及加速网络。
 
