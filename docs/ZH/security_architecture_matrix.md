@@ -24,9 +24,9 @@
 | **Playbook 部署模式** | `vhosts` |
 | **IaC 所需资源** | DNS A 记录 (openclaw) |
 | **存储依赖** | `openclaw workdir` (模型文件与缓存档挂载) |
-| **独立数据库** | `openclaw` |
-| **独立用户** | `openclaw_user` |
-| **鉴权连接串参考** | `postgres://openclaw_user:${OPENCLAW_PG_PASSWORD}@127.0.0.1:15432/openclaw?sslmode=disable` |
+| **独立数据库** | *N/A* |
+| **独立用户** | *N/A* |
+| **鉴权连接串参考** | (无独立数据库，通过 API 接入 QMD/RAG 服务) |
 
 ### 1.3 RAG / QMD (检索增强引擎)
 | 属性 | 详情 |
@@ -35,7 +35,7 @@
 | **本地监听端口** | 动态分配 |
 | **Playbook 部署模式** | `vhosts` / `docker` |
 | **IaC 所需资源** | 内部服务网格路由 |
-| **存储依赖** | Milvus/Chroma 向量引擎, 本地文档分片卷 |
+| **存储依赖** | PostgreSQL (启用 pgvector 扩展), 本地文档分片卷 |
 | **独立数据库** | `rag` |
 | **独立用户** | `rag_user` |
 | **鉴权连接串参考** | `postgres://rag_user:${RAG_PG_PASSWORD}@127.0.0.1:15432/rag?sslmode=disable` |
